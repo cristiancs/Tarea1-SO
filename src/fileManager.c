@@ -1,5 +1,7 @@
 #include "../include/fileManager.h"
 
+
+
 int numeroToLetra(int numero, char *place){
 	if(numero == 1){
 		strcpy(place, "A");
@@ -17,6 +19,38 @@ int numeroToLetra(int numero, char *place){
 		strcpy(place, "E");
 	}
 	return 1;
+}
+
+int LetraToNumero(char place){
+	if(place == 'A'){
+		return 0;
+	}
+	else if(place == 'B'){
+		return 1;
+	}
+	else if(place == 'C'){
+		return 2;
+	}
+	else if(place == 'D'){
+		return 3;
+	}
+	else if(place == 'E'){
+		return 4;
+	}
+	return -1;
+}
+
+int actionToNumber(char* action){
+	if(strcmp(action, "B") == 0){
+		return 1;
+	}
+	else if(strcmp(action, "A") == 0){
+		return 2;
+	}
+	else if(strcmp(action, "D") == 0){
+		return 3;
+	}
+	return -1;
 }
 
 int CreateFolders(){
@@ -54,7 +88,7 @@ int CreateFolders(){
 	return 0;
 };
 
-int accessPosition(int jugador, char columna[2], char fila[2],char action[2],char letter[2]){
+int accessPosition(int jugador, char columna[2], char fila[2],char action[2],char letter[2], int tablero[][5]){
 	char name[100];
 	// Armar Ruta
 	if(jugador == 1){
@@ -70,44 +104,64 @@ int accessPosition(int jugador, char columna[2], char fila[2],char action[2],cha
 	strcat(name, "/");
 	strcat(name, letter);
 
+	int cnum = LetraToNumero(columna[0]);
+	int fnum = ((int)fila[0] - '0') -1 ;
+	//printf("%s %s %s%s %d%d %d %d \n",action, letter, columna, fila, cnum, fnum, tablero[fnum][cnum], actionToNumber(letter) );
+	if(strcmp(action, "W") != 0){
+
+		if(tablero[fnum][cnum] == actionToNumber(letter)){
+			return -1;
+		}
+		return 1;
+	}
+
+
 	DIR* dir = opendir(name);
+	//printf("%s\n", name);
 	if (dir){
-		if(strcmp(action, "D")){
+		// Archivo Existe
+		
+
+		if(strcmp(action, "D") == 0){
 			rmdir(name);
 		}
-		//printf("Archivo existe \n");
-	    closedir(dir);
+		closedir(dir);
+		// Espera para evitar Broken pipe: 13
+	   	usleep(10000);
 	    return -1;
 	}
 	else if (ENOENT == errno){
-		//printf("Archivo NO existe \n");
+		// Archivo no existe
 		if(strcmp(action, "W") == 0){
 			mkdir(name, 0777);
+			tablero[fnum][cnum] = actionToNumber(letter);
+			
 		}
-	    
+		// Espera para evitar Broken pipe: 13
+	    usleep(10000);
 	    return 1;
 	}
 	return 0;
 }
 // 1 => No Existe, -1 => Existe
-int createShip(int jugador, char columna[2], char fila[2]){
-	return accessPosition(jugador, columna, fila, "W", "B");
+int createShip(int jugador, char columna[2], char fila[2], int tablero[][5]){
+	return accessPosition(jugador, columna, fila, "W", "B", tablero);
 }
-int checkShip(int jugador, char columna[2], char fila[2]){
-	return accessPosition(jugador, columna, fila, "R", "B");
+int checkShip(int jugador, char columna[2], char fila[2], int tablero[][5]){
+	return accessPosition(jugador, columna, fila, "R", "B", tablero);
 }
-int destroyShip(int jugador, char columna[2], char fila[2]){
-	return accessPosition(jugador, columna, fila, "W", "D");
-	return accessPosition(jugador, columna, fila, "D", "B");
+int destroyShip(int jugador, char columna[2], char fila[2], int tablero[][5]){
+	accessPosition(jugador, columna, fila, "D", "B", tablero);
+	return accessPosition(jugador, columna, fila, "W", "D", tablero);
 }
-int checkDestroyedShip(int jugador, char columna[2], char fila[2]){
-	return accessPosition(jugador, columna, fila, "R", "D");
+int checkDestroyedShip(int jugador, char columna[2], char fila[2], int tablero[][5]){
+	return accessPosition(jugador, columna, fila, "R", "D", tablero);
 }
 // 1 => No Existe, -1 => Existe
-int checkAttack(int jugador, char columna[2], char fila[2]){
-	return accessPosition(jugador, columna, fila, "R", "A");
+int checkAttack(int jugador, char columna[2], char fila[2], int tablero[][5]){
+	return accessPosition(jugador, columna, fila, "R", "A", tablero);
 }
 
-int createAttack(int jugador, char columna[2], char fila[2]){
-	return accessPosition(jugador, columna, fila, "W", "A");
+int createAttack(int jugador, char columna[2], char fila[2], int tablero[][5]){
+	return accessPosition(jugador, columna, fila, "W", "A", tablero);
 }

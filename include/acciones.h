@@ -2,7 +2,7 @@
 #define ACCIONES
 #include "fileManager.h"
 #include <sys/wait.h>
-
+#include <unistd.h>
 
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
@@ -15,9 +15,10 @@
 
 
 
-int atacar(char* mensaje, int jugador);
-int solicitarCoordenadas(int jugador, int jugador_enemigo, int* pipe);
-int generarGraficos(int jugador);
-int notificarResultados(char *mensaje, int jugador, int* pipe);
+int atacar(char* mensaje, int jugador, int tablero[][5]);
+int solicitarCoordenadas(int jugador, int jugador_enemigo, int* pipe, int tablero[][5]);
+int generarGraficos(int jugador, int tablero[][5]);
+int notificarResultados(char *mensaje, int jugador, int* pipe, int tablero[][5]);
 int mostrarResultados(char *mensaje);
+int checkFin(int jugador, int tablero[][5]);
 #endif
